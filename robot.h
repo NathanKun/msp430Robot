@@ -24,10 +24,10 @@
 #define delay_us(x) __delay_cycles((long)(CPU_F*(double)x/1000000.0))
 #define delay_ms(x) __delay_cycles((long)(CPU_F*(double)x/1000.0))
 
-#define MOTORAPWMPIN P21
+#define MOTORAPWMPIN P22
 #define MOTORBPWMPIN P24
-#define MOTORADIRPIN P21
-#define MOTORBDIRPIN P24
+#define MOTORADIRPIN P11
+#define MOTORBDIRPIN P12
 
 // direction enum
 typedef enum {
@@ -48,7 +48,10 @@ void initRobot();
 void setMortorSpeed(motor motor, int speed);
 void setMortorDirection(motor motor, direction d);
 int readOpto(opto opto);
-
+void goForward(int speed);
+void goBack(int speed);
+void turnLeft(int speed);
+void turnRight(int speed);
 
 
 

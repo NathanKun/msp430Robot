@@ -41,7 +41,7 @@ void initMotor() {
 
 void initRobot() {
 	initPorts();
-	initRobotPort2();
+	initRobotPort1();
 	initRobotPort2();
 	initMotor();
 }
