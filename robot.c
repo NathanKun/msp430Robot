@@ -7,36 +7,31 @@
 #include "robot.h"
 
 void initRobotPort1() {
+	P1DIR &= ~(BIT0 | BIT1 | BIT2 | BIT3);
+	P1REN |= BIT0 | BIT1 | BIT2 | BIT3;
 	// TODO wait for design
 }
 
 void initRobotPort2() {
 	P2DIR = 0x36;
+	P2SEL = 0x14; // PWM: P2.2 P2.4
 	// TODO P26, P27 unknown
 }
 
 void initMotor() {
 	// for sure
-	TA0CTL = 0;
-	TA0CCR0 = 0;
-	TA0R = 0;
-	TA0CTL &= ~TAIFG; // reset flag
-	TA0CTL = UP_MODE | TASSEL_2 | ID_0; // use SMCLK
-	TA0CCTL1 |= OUTMOD_7;
-	TA0CCR0 = 1000;
-	TA0CCR1 = 0; // speed = 0
-
 	TA1CTL = 0;
 	TA1CCR0 = 0;
 	TA1R = 0;
 	TA1CTL &= ~TAIFG;
+
 	TA1CTL = UP_MODE | TASSEL_2 | ID_0; // use SMCLK
 	TA1CCTL1 |= OUTMOD_7;
+	TA1CCTL2 |= OUTMOD_7;
+
 	TA1CCR0 = 1000;
 	TA1CCR1 = 0;
-
-	selectPin(MOTORAPWMPIN, 1);
-	selectPin(MOTORBPWMPIN, 1);
+	TA1CCR2 = 0;
 }
 
 void initRobot() {
@@ -48,18 +43,18 @@ void initRobot() {
 
 void setMortorSpeed(motor motor, int speed) {
 	if (motor == motorA) {
-		TA0CCR1 = 10 * speed;
-	} else if (motor == motorB) {
 		TA1CCR1 = 10 * speed;
+	} else if (motor == motorB) {
+		TA1CCR2 = 10 * speed;
 	}
 }
 
 void setMortorDirection(motor motor, direction d) {
 	if (motor == motorA) {
 		if(d == FORWARD) {
-			digitalWrite(MOTORADIRPIN, HIGH);
-		} else if (d == BACK) {
 			digitalWrite(MOTORADIRPIN, LOW);
+		} else if (d == BACK) {
+			digitalWrite(MOTORADIRPIN, HIGH);
 		}
 	} else if (motor == motorB) {
 		if(d == FORWARD) {

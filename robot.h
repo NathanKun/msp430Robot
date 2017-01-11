@@ -6,11 +6,11 @@
  */
 
 /**
- * P1.0-P1.7 Connectés au bornier vert (cf nomenclature sur CI) Entrées / Sorties
- * P 2.0 Opto-coupleur roue A 									Entrée
+ * P1.0-P1.7 Connectï¿½s au bornier vert (cf nomenclature sur CI) Entrï¿½es / Sorties
+ * P 2.0 Opto-coupleur roue A 									Entrï¿½e
  * P 2.1 Sens pour le moteur A 									Sortie
  * P 2.2 PWM pour le moteur A, 250 KHz maximum 					Sortie
- * P 2.3 Opto-coupleur roue B 									Entrée
+ * P 2.3 Opto-coupleur roue B 									Entrï¿½e
  * P 2.4 PWM pour le moteur B, 250 KHz maximum 					Sortie
  * P 2.5 Sens pour le moteur B 									Sortie
  */
@@ -26,8 +26,8 @@
 
 #define MOTORAPWMPIN P22
 #define MOTORBPWMPIN P24
-#define MOTORADIRPIN P11
-#define MOTORBDIRPIN P12
+#define MOTORADIRPIN P21
+#define MOTORBDIRPIN P25
 
 // direction enum
 typedef enum {
@@ -52,9 +52,9 @@ void goForward(int speed);
 void goBack(int speed);
 void turnLeft(int speed);
 void turnRight(int speed);
-
-
-
+void goForwardTurn(int speedA, int speedB);
+void goBackTurn(int speedA, int speedB);
+void stopRobot();
 
 
 
