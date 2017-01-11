@@ -5,7 +5,6 @@ targetConfigs/
 .ccsproject
 .cproject
 lnk_msp430g2553.cmd
-main.c
 simpleMSP.zip
 
 #################
