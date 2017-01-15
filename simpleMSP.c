@@ -374,7 +374,7 @@ void timer_create(timer timer, uint32_t microsecond,
 
 		if (interrupt_enable == ENABLE)
 			TA0CTL |= TAIE; // enable timer interruption
-	} else if (timer == TIMER1){
+	} else if (timer == TIMER1) {
 		TA1CTL = 0;
 		TA1CCR0 = 0;
 		TA1R = 0;
@@ -402,7 +402,7 @@ void timer_delete(timer timer) {
 		TA0CCTL0 = 0;
 		TA0CCTL1 = 0;
 		TA0CCTL2 = 0;
-	} else if (timer == TIMER1){
+	} else if (timer == TIMER1) {
 		TA1CTL &= ~TAIE; // disable timer interruption
 		TA1CTL &= ~MC_3; // halt timer
 		TA1CTL |= TACLR; // Timer_A clear
@@ -438,5 +438,30 @@ void clearFlag(const uint8_t pin) {
 		TA0CTL &= ~TAIFG;
 	} else if (pin == TIMER1) {
 		TA1CTL &= ~TAIFG;
+	}
+}
+
+uint8_t checkFlag(const uint8_t pin) {
+	uint16_t bit = pinToBit(pin);
+	if (isPort1Pin(pin)) {
+		if ((P1IFG & bit) == bit)
+			return 1;
+		else
+			return 0;
+	} else if (isPort2Pin(pin)) {
+		if ((P2IFG & bit) == bit)
+			return 1;
+		else
+			return 0;
+	} else if (pin == TIMER0) {
+		if ((TA0CTL & TAIFG) == TAIFG)
+			return 1;
+		else
+			return 0;
+	} else if (pin == TIMER1) {
+		if ((TA1CTL & TAIFG) == TAIFG)
+			return 1;
+		else
+			return 0;
 	}
 }

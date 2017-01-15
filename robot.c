@@ -7,14 +7,14 @@
 #include "robot.h"
 
 void initRobotPort1() {
-	P1DIR &= ~(BIT0 | BIT1 | BIT2 | BIT3);
-	P1REN |= BIT0 | BIT1 | BIT2 | BIT3;
 	// TODO wait for design
 }
 
 void initRobotPort2() {
 	P2DIR = 0x36;
 	P2SEL = 0x14; // PWM: P2.2 P2.4
+	P2IE |= 0x09; // opto: P2.0 p2.3
+	P2REN |= 0x09;
 	// TODO P26, P27 unknown
 }
 
@@ -34,6 +34,18 @@ void initMotor() {
 	TA1CCR2 = 0;
 }
 
+void initTimer0() {
+	BCSCTL1 = CALBC1_1MHZ;
+	DCOCTL = CALDCO_1MHZ;
+	TA0CTL = 0;
+	TA0CCR0 = 0;
+	TA0R = 0;
+	TA0CTL &= ~TAIFG;
+
+	TA0CTL = UP_MODE | TASSEL_2 | ID_1 | TAIE; // use SMCLK
+	TA0CCR0 = 50000;
+}
+
 void initRobot() {
 	initPorts();
 	initRobotPort1();
@@ -45,19 +57,19 @@ void setMortorSpeed(motor motor, int speed) {
 	if (motor == motorA) {
 		TA1CCR1 = 10 * speed;
 	} else if (motor == motorB) {
-		TA1CCR2 = 10 * speed;
+		TA1CCR2 = 10 * speed * 0.965;
 	}
 }
 
 void setMortorDirection(motor motor, direction d) {
 	if (motor == motorA) {
-		if(d == FORWARD) {
+		if (d == FORWARD) {
 			digitalWrite(MOTORADIRPIN, LOW);
 		} else if (d == BACK) {
 			digitalWrite(MOTORADIRPIN, HIGH);
 		}
 	} else if (motor == motorB) {
-		if(d == FORWARD) {
+		if (d == FORWARD) {
 			digitalWrite(MOTORBDIRPIN, HIGH);
 		} else if (d == BACK) {
 			digitalWrite(MOTORBDIRPIN, LOW);
@@ -67,9 +79,9 @@ void setMortorDirection(motor motor, direction d) {
 
 int readOpto(opto opto) {
 	if (opto == optoA)
-		return digitalRead(P20);
+		return digitalRead(MOTORAOPTOPIN);
 	else if (opto == optoB)
-		return digitalRead(P23);
+		return digitalRead(MOTORBOPTOPIN);
 	return 0;
 }
 
@@ -118,4 +130,19 @@ void goBackTurn(int speedA, int speedB) {
 void stopRobot() {
 	setMortorSpeed(motorA, 0);
 	setMortorSpeed(motorB, 0);
+}
+
+void ajustGoFoward(uint16_t a, uint16_t b, uint8_t speed) {
+	uint16_t ccr = 10 * speed;
+	if (a - b >= 2) {
+		if (TA1CCR2 == 0)
+			TA1CCR2 = TA1CCR1 * 0.965;
+		else if (TA1CCR1 == ccr)
+			TA1CCR1 = 0;
+	} else if (b - a >= 2) {
+		if (TA1CCR1 == 0)
+			TA1CCR1 = ccr;
+		else if (TA1CCR2 == ccr * 0.965)
+			TA1CCR2 = 0;
+	}
 }

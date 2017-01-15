@@ -28,6 +28,8 @@
 #define MOTORBPWMPIN P24
 #define MOTORADIRPIN P21
 #define MOTORBDIRPIN P25
+#define MOTORAOPTOPIN P20
+#define MOTORBOPTOPIN P23
 
 // direction enum
 typedef enum {
@@ -55,7 +57,7 @@ void turnRight(int speed);
 void goForwardTurn(int speedA, int speedB);
 void goBackTurn(int speedA, int speedB);
 void stopRobot();
-
+void ajustGoFoward(uint16_t a, uint16_t b, uint8_t speed);
 
 
 
