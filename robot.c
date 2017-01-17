@@ -8,13 +8,16 @@
 
 void initRobotPort1() {
 	// TODO wait for design
+	P1DIR &= ~(BIT0 | BIT1 | BIT2 | BIT3 | BIT4);
 }
 
 void initRobotPort2() {
 	P2DIR = 0x36;
 	P2SEL = 0x14; // PWM: P2.2 P2.4
-	P2IE |= 0x09; // opto: P2.0 p2.3
-	P2REN |= 0x09;
+	//P2IE |= 0x09; // opto: P2.0 p2.3
+	P2IE |= (BIT0 | BIT3);
+	P2IES &= ~(BIT0 | BIT3); // opto: P2.0 p2.3
+	//P2REN |= 0x09;
 	// TODO P26, P27 unknown
 }
 
@@ -29,7 +32,7 @@ void initMotor() {
 	TA1CCTL1 |= OUTMOD_7;
 	TA1CCTL2 |= OUTMOD_7;
 
-	TA1CCR0 = 1000;
+	TA1CCR0 = 10000;
 	TA1CCR1 = 0;
 	TA1CCR2 = 0;
 }
@@ -55,9 +58,9 @@ void initRobot() {
 
 void setMortorSpeed(motor motor, int speed) {
 	if (motor == motorA) {
-		TA1CCR1 = 10 * speed;
+		TA1CCR1 = 100 * speed * 0.98;
 	} else if (motor == motorB) {
-		TA1CCR2 = 10 * speed * 0.965;
+		TA1CCR2 = 100 * speed;
 	}
 }
 
@@ -70,9 +73,9 @@ void setMortorDirection(motor motor, direction d) {
 		}
 	} else if (motor == motorB) {
 		if (d == FORWARD) {
-			digitalWrite(MOTORBDIRPIN, HIGH);
-		} else if (d == BACK) {
 			digitalWrite(MOTORBDIRPIN, LOW);
+		} else if (d == BACK) {
+			digitalWrite(MOTORBDIRPIN, HIGH);
 		}
 	}
 }
@@ -133,16 +136,20 @@ void stopRobot() {
 }
 
 void ajustGoFoward(uint16_t a, uint16_t b, uint8_t speed) {
-	uint16_t ccr = 10 * speed;
+	uint16_t ccr = 100 * speed;
 	if (a - b >= 2) {
-		if (TA1CCR2 == 0)
-			TA1CCR2 = TA1CCR1 * 0.965;
+		if (TA1CCR2 <= ccr * 0.95)
+			TA1CCR2 = ccr;
 		else if (TA1CCR1 == ccr)
-			TA1CCR1 = 0;
+			TA1CCR1 = ccr * 0.9;
+		//P1OUT |= BIT0;
+		//P1OUT &= ~BIT6;
 	} else if (b - a >= 2) {
-		if (TA1CCR1 == 0)
+		if (TA1CCR1 <= ccr * 0.95)
 			TA1CCR1 = ccr;
-		else if (TA1CCR2 == ccr * 0.965)
-			TA1CCR2 = 0;
+		else if (TA1CCR2 == ccr)
+			TA1CCR2 = ccr * 0.9;
+		//P1OUT |= BIT6;
+		//P1OUT &= ~BIT0;
 	}
 }
