@@ -2,27 +2,24 @@
  * robot.c
  *
  *  Created on: 5 janv. 2017
- *      Author: j.he.12
+ *      Author: Junyang HE
  */
 #include "robot.h"
 
 void initRobotPort1() {
 	// TODO wait for design
-	P1DIR &= ~(BIT0 | BIT1 | BIT2 | BIT3 | BIT4);
+	P1DIR &= ~(BIT0 | BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT6);
+	P1REN |= (BIT0 | BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT6);
 }
 
 void initRobotPort2() {
-	P2DIR = 0x36;
+	P2DIR = 0x36; // P2.1 2 4 5 out, p2.0 3 in
 	P2SEL = 0x14; // PWM: P2.2 P2.4
-	//P2IE |= 0x09; // opto: P2.0 p2.3
-	P2IE |= (BIT0 | BIT3);
-	P2IES &= ~(BIT0 | BIT3); // opto: P2.0 p2.3
-	//P2REN |= 0x09;
+	P2IE |= (BIT0); //opto: P2.0 p2.3, p2.3 dammaged
 	// TODO P26, P27 unknown
 }
 
 void initMotor() {
-	// for sure
 	TA1CTL = 0;
 	TA1CCR0 = 0;
 	TA1R = 0;
@@ -38,25 +35,25 @@ void initMotor() {
 }
 
 void initTimer0() {
-	BCSCTL1 = CALBC1_1MHZ;
-	DCOCTL = CALDCO_1MHZ;
 	TA0CTL = 0;
 	TA0CCR0 = 0;
 	TA0R = 0;
 	TA0CTL &= ~TAIFG;
 
-	TA0CTL = UP_MODE | TASSEL_2 | ID_1 | TAIE; // use SMCLK
-	TA0CCR0 = 50000;
+	TA0CTL = UP_DOWN_MODE | TASSEL_2 | ID_3 | TAIE; // use SMCLK
+	TA0CCR0 = 62500;
 }
 
 void initRobot() {
 	initPorts();
 	initRobotPort1();
 	initRobotPort2();
+	timer_init();
+	initTimer0();
 	initMotor();
 }
 
-void setMortorSpeed(motor motor, int speed) {
+void setMotorSpeed(motor motor, int speed) {
 	if (motor == motorA) {
 		TA1CCR1 = 100 * speed * 0.98;
 	} else if (motor == motorB) {
@@ -64,7 +61,7 @@ void setMortorSpeed(motor motor, int speed) {
 	}
 }
 
-void setMortorDirection(motor motor, direction d) {
+void setMotorDirection(motor motor, direction d) {
 	if (motor == motorA) {
 		if (d == FORWARD) {
 			digitalWrite(MOTORADIRPIN, LOW);
@@ -89,53 +86,58 @@ int readOpto(opto opto) {
 }
 
 void goForward(int speed) {
-	setMortorDirection(motorA, FORWARD);
-	setMortorDirection(motorB, FORWARD);
-	setMortorSpeed(motorA, speed);
-	setMortorSpeed(motorB, speed);
+	setMotorDirection(motorA, FORWARD);
+	setMotorDirection(motorB, FORWARD);
+	setMotorSpeed(motorA, speed);
+	setMotorSpeed(motorB, speed);
 }
 
 void goBack(int speed) {
-	setMortorDirection(motorA, BACK);
-	setMortorDirection(motorB, BACK);
-	setMortorSpeed(motorA, speed);
-	setMortorSpeed(motorB, speed);
+	setMotorDirection(motorA, BACK);
+	setMotorDirection(motorB, BACK);
+	setMotorSpeed(motorA, speed);
+	setMotorSpeed(motorB, speed);
 }
 
 void turnLeft(int speed) {
-	setMortorDirection(motorA, BACK);
-	setMortorDirection(motorB, FORWARD);
-	setMortorSpeed(motorA, speed);
-	setMortorSpeed(motorB, speed);
+	setMotorDirection(motorA, BACK);
+	setMotorDirection(motorB, FORWARD);
+	setMotorSpeed(motorA, speed);
+	setMotorSpeed(motorB, speed);
 }
 
 void turnRight(int speed) {
-	setMortorDirection(motorA, FORWARD);
-	setMortorDirection(motorB, BACK);
-	setMortorSpeed(motorA, speed);
-	setMortorSpeed(motorB, speed);
+	setMotorDirection(motorA, FORWARD);
+	setMotorDirection(motorB, BACK);
+	setMotorSpeed(motorA, speed);
+	setMotorSpeed(motorB, speed);
 }
 
 void goForwardTurn(int speedA, int speedB) {
-	setMortorDirection(motorA, FORWARD);
-	setMortorDirection(motorB, FORWARD);
-	setMortorSpeed(motorA, speedA);
-	setMortorSpeed(motorB, speedB);
+	setMotorDirection(motorA, FORWARD);
+	setMotorDirection(motorB, FORWARD);
+	setMotorSpeed(motorA, speedA);
+	setMotorSpeed(motorB, speedB);
 }
 
 void goBackTurn(int speedA, int speedB) {
-	setMortorDirection(motorA, BACK);
-	setMortorDirection(motorB, BACK);
-	setMortorSpeed(motorA, speedA);
-	setMortorSpeed(motorB, speedB);
+	setMotorDirection(motorA, BACK);
+	setMotorDirection(motorB, BACK);
+	setMotorSpeed(motorA, speedA);
+	setMotorSpeed(motorB, speedB);
 }
 
 void stopRobot() {
-	setMortorSpeed(motorA, 0);
-	setMortorSpeed(motorB, 0);
+	int i = 100;
+	for (i = TA1CCR1 / 100; i >= 0; i = i - 2){
+		setMotorSpeed(motorA, i);
+		setMotorSpeed(motorB, i);
+	}
+	setMotorSpeed(motorA, 0);
+	setMotorSpeed(motorB, 0);
 }
 
-void ajustGoFoward(uint16_t a, uint16_t b, uint8_t speed) {
+void adjustGoFoward(uint16_t a, uint16_t b, uint8_t speed) {
 	uint16_t ccr = 100 * speed;
 	if (a - b >= 2) {
 		if (TA1CCR2 <= ccr * 0.95)
