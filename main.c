@@ -14,7 +14,7 @@
 #include "robot.h"
 
 #define perimeter_mm 135				/* perimeter of wheel */
-#define ir_sill 540						/* sill of ir-sensor output when obstacle detected (after ADC) */
+#define ir_sill 550						/* sill of ir-sensor output when obstacle detected (after ADC) */
 #define turn90DelayMs 610				/* time needed for turning 90 degrees, roughly because it depends on battery's voltage, floor's friction, etc..*/
 #define time_out 20						/* 20 seconds time out */
 
@@ -47,8 +47,8 @@ void setDistance(const int distance_mm) {
  * \param speed from 0 to 100
  */
 void waitDistance(const int speed) {
+	uint16_t irA = 0, irB = 0;
 	while ((optoA_count - optoA_count_set < opto_need) && (timer0_count < time_out)) {  /* if distance not reached and not time outed */
-		uint16_t irA, irB;
 		irA = analogRead(A1);	/* read 2 ir sensors */
 		irB = analogRead(A2);
 		if ((irA >= ir_sill || irB >= ir_sill) && !paused) {	/* if obstacle detected and not paused*/
@@ -62,7 +62,7 @@ void waitDistance(const int speed) {
 		} else if ((irA < ir_sill && irB < ir_sill) && paused) {/* if no obstacles but paused */
 			digitalWrite(P10, LOW);								/* turn off led(s) */
 			digitalWrite(P16, LOW);
-			delay_ms(200);
+			delay_ms(150);
 			goForward(speed);									/* go ahead */
 			paused = false;
 		}
@@ -72,6 +72,7 @@ void waitDistance(const int speed) {
 		stopRobot();
 	}
 }
+
 /**
  * go forward for a given distance with a given speed
  * \param speed from 0 to 100
