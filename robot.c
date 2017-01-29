@@ -8,8 +8,9 @@
 
 void initRobotPort1() {
 	// TODO wait for design
-	P1DIR &= ~(BIT0 | BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT6);
-	P1REN |= (BIT0 | BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT6);
+	P1DIR &= ~(BIT1 | BIT2 | BIT3 | BIT4 | BIT5);
+	P1DIR |= (BIT0 | BIT6);
+	P1REN |= (BIT1 | BIT2 | BIT3 | BIT4 | BIT5);
 }
 
 void initRobotPort2() {

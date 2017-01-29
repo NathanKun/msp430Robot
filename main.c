@@ -49,9 +49,9 @@ void setDistance(const int distance_mm) {
 void waitDistance(const int speed) {
 	uint16_t irA = 0, irB = 0;
 	while ((optoA_count - optoA_count_set < opto_need) && (timer0_count < time_out)) {  /* if distance not reached and not time outed */
-		irA = analogRead(A1);	/* read 2 ir sensors */
-		irB = analogRead(A2);
-		if ((irA >= ir_sill || irB >= ir_sill) && !paused) {	/* if obstacle detected and not paused*/
+		irA = analogRead(A4);	/* read 2 ir sensors */
+		irB = analogRead(A5);
+		if ((irA >= ir_sill || irB >= ir_sill ||  digitalRead(P11) == HIGH || digitalRead(P12) == HIGH) && !paused) {	/* if obstacle detected and not paused*/
 			if(irA >= ir_sill)	digitalWrite(P10, HIGH);		/* turn on led(s) to show obstacle(s) detected */
 			else digitalWrite(P10, LOW);
 			if(irB >= ir_sill)	digitalWrite(P16, HIGH);
@@ -59,7 +59,7 @@ void waitDistance(const int speed) {
 			stopRobot();										/* stop robot */
 			delay_ms(500);										/* wait a little before reread sensors */
 			paused = true;
-		} else if ((irA < ir_sill && irB < ir_sill) && paused) {/* if no obstacles but paused */
+		} else if ((irA < ir_sill && irB < ir_sill)  && (digitalRead(P11) == LOW && digitalRead(P12) == LOW) && paused) {/* if no obstacles but paused */
 			digitalWrite(P10, LOW);								/* turn off led(s) */
 			digitalWrite(P16, LOW);
 			delay_ms(150);
@@ -168,6 +168,14 @@ void main(void) {
 		//a = analogRead(A1);
 		//b = analogRead(A2);
 		//ajustGoFoward(optoA_count, optoB_count, 100);
+		if(digitalRead(P11) == HIGH)
+			digitalWrite(P10, HIGH);
+		else
+			digitalWrite(P10, LOW);
+		if(digitalRead(P12) == HIGH)
+			digitalWrite(P16, HIGH);
+		else
+			digitalWrite(P16, LOW);
 	}
 }
 
