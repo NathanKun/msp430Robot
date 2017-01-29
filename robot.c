@@ -6,9 +6,27 @@
  */
 #include "robot.h"
 
+void initADC() {
+	// init to 0
+	ADC10CTL0 = ADC10CTL1 = 0;
+
+	// SREF_0: reference Vcc GND
+	// ADC10SHT_0: 4 x ADC10CLKs
+	// REF2_5V: reference-generator voltage 2,5 Volts
+	// REFON: Reference generator on
+	// ADC10ON: ADC10 on
+	ADC10CTL0 = SREF_0 + ADC10SHT_0 + REF2_5V + REFON + ADC10ON;
+
+	// ADC10DIV_0: ADC10 clock divider = 1
+	// ADC10SSEL_2: ADC10 clock source select MCLK, 1MHz
+	// SHS_0: Sample-and-hold source select = ADC10SC bit
+	// CONSEQ_0: Conversion sequence mode select = Single-channel-single-conversion
+	ADC10CTL1 = ADC10DIV_0 + ADC10SSEL_2 + SHS_0 + CONSEQ_0;
+}
+
 void initRobotPort1() {
 	// TODO wait for design
-	P1DIR &= ~(BIT1 | BIT2 | BIT3 | BIT4 | BIT5);
+	P1DIR &= ~(BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT7);
 	P1DIR |= (BIT0 | BIT6);
 	P1REN |= (BIT1 | BIT2 | BIT3 | BIT4 | BIT5);
 }
@@ -52,6 +70,7 @@ void initRobot() {
 	timer_init();
 	initTimer0();
 	initMotor();
+	initADC();
 }
 
 void setMotorSpeed(motor motor, int speed) {

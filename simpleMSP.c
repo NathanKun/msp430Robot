@@ -263,25 +263,9 @@ void initPorts() {
  }*/
 
 uint16_t analogRead(const inch input_channel) {
-	// init to 0
-	ADC10CTL0 = ADC10CTL1 = 0;
-
-	// SREF_0: reference Vcc GND
-	// ADC10SHT_0: 4 x ADC10CLKs
-	// REF2_5V: reference-generator voltage 2,5 Volts
-	// REFON: Reference generator on
-	// ADC10ON: ADC10 on
-	ADC10CTL0 = SREF_0 + ADC10SHT_0 + REF2_5V + REFON + ADC10ON;
-
-	// ADC10DIV_0: ADC10 clock divider = 1
-	// ADC10SSEL_2: ADC10 clock source select MCLK, 1MHz
-	// SHS_0: Sample-and-hold source select = ADC10SC bit
-	// CONSEQ_0: Conversion sequence mode select = Single-channel-single-conversion
-	ADC10CTL1 = ADC10DIV_0 + ADC10SSEL_2 + SHS_0 + CONSEQ_0;
 
 	// input channel select
-	ADC10CTL1 = (input_channel * 0x1000) + ADC10DIV_0 + ADC10SSEL_2 + SHS_0
-			+ CONSEQ_0;
+	ADC10CTL1 = (input_channel * 0x1000);
 	;
 	ADC10CTL0 |= ENC + ADC10SC;     // Sampling and conversion start
 
@@ -464,4 +448,5 @@ uint8_t checkFlag(const uint8_t pin) {
 		else
 			return 0;
 	}
+	return 0;
 }

@@ -36,6 +36,11 @@ typedef enum {
 FORWARD = HIGH, BACK = LOW
 } direction;
 
+// direction enum
+typedef enum {
+left = 0, right = 1
+} turnDirection;
+
 // motor enum
 typedef enum {
 	motorA = 0, motorB = 1
