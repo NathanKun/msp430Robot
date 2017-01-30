@@ -32,8 +32,9 @@ void initRobotPort1() {
 }
 
 void initRobotPort2() {
-	P2DIR = 0x36; // P2.1 2 4 5 out, p2.0 3 in
-	P2SEL = 0x14; // PWM: P2.2 P2.4
+	P2DIR = 0x36; // P2.1 2 4 5 out, p2.0 3 XIN XOUT in
+	P2SEL = 0x14; // PWM: P2.2 P2.4, XIN XOUT as GPIO
+	P2SEL2 = 0x00;
 	P2IE |= (BIT0); //opto: P2.0 p2.3, p2.3 dammaged
 	// TODO P26, P27 unknown
 }
